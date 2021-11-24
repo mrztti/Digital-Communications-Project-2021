@@ -15,7 +15,7 @@ EbN0 = -1:8; % power efficiency range
 % ======================================================================= %
 % Other Options
 % ======================================================================= %
-sm = SymbolMapper.QPSK_GRAY; % Choise of constellation
+
 
 % ======================================================================= %
 % Simulation Chain
@@ -36,8 +36,8 @@ for i = 1:length(EbN0) % use parfor ('help parfor') to parallelize
   % [ENC] convolutional encoder
   % ...
 
-  % [MOD] symbol mapper  
-  x = sm.map(c);
+  % [MOD] symbol mapper
+  % ...
 
   % [CHA] add Gaussian noise
   y = AWGN_channel(x, snr);
@@ -52,7 +52,7 @@ for i = 1:length(EbN0) % use parfor ('help parfor') to parallelize
   % ===================================================================== %
   % End processing one block of information
   % ===================================================================== %
-  BitErrs = 0; % count the bit errors and evaluate the bit error rate
+  BitErrs = ...; % count the bit errors and evaluate the bit error rate
   totErr = totErr + BitErrs;
   num = num + N; 
 
@@ -65,8 +65,6 @@ end
 % ======================================================================= %
 % End
 % ======================================================================= %
-
-
 
 % ======================================================================= %
 % Custom functions
@@ -93,7 +91,19 @@ function y = AWGN_channel(x, snr)
     end
 end
 
-
+classdef SymbolMapper
+    properties
+        mapping_function
+    end
+    methods
+        function sm = SymbolMapper(f)
+            sm.mapping_function = f;
+        end
+    end
+    enumeration
+        BPSK()
+    end
+end
 
 
 
