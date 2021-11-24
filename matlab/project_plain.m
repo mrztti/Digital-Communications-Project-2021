@@ -15,7 +15,7 @@ EbN0 = -1:8; % power efficiency range
 % ======================================================================= %
 % Other Options
 % ======================================================================= %
-sm = SymbolMapper.QPSK_GRAY; % Choise of constellation
+sm = SymbolMapper.QPSK_GRAY; % Choice of constellation
 
 % ======================================================================= %
 % Simulation Chain
