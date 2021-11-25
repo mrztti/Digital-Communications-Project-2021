@@ -23,8 +23,7 @@ classdef SymbolMapper
         end
 
         function c = constellation(obj)
-            c = obj.mapping_function(binary_basis(obj.n));
-        end
+            c = obj.map
 
     end
     enumeration
@@ -60,7 +59,7 @@ function x = QPSKG_map(c)
 end
 
 function b = binary_basis(n)
-    b = dec2bin(0:2^n-1)' - '0';
+    b = dec2bin(0:2^n-1)' - '0'
 end
 
 function x = AMPM_map(c)
