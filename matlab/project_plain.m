@@ -15,7 +15,8 @@ EbN0 = -1:8; % power efficiency range
 % ======================================================================= %
 % Other Options
 % ======================================================================= %
-constellation = SymbolMapper.AMPM; % Choise of constellation
+constellation = SymbolMapper.AMPM; % Choice of constellation
+
 
 % ======================================================================= %
 % Simulation Chain
