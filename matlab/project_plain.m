@@ -10,12 +10,12 @@ clear
 N = 3e2;  % simulate N bits each transmission (one block)
 maxNumErrs = 100; % get at least 100 bit errors (more is better)
 maxNum = 1e3; % OR stop if maxNum bits have been simulated
-EbN0 = -1:8; % power efficiency range
+EbN0 = [-10, 0, 10, 20, 30];%-1:8; % power efficiency range
 
 % ======================================================================= %
 % Other Options
 % ======================================================================= %
-constellation = SymbolMapper.AMPM; % Choice of constellation
+constellation = SymbolMapper.QPSK_GRAY; % Choice of constellation
 
 
 % ======================================================================= %
