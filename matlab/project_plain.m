@@ -50,6 +50,7 @@ parfor i = 1:length(EbN0) % use parfor ('help parfor') to parallelize
   plt = plot_symbols(y, constellation, snr);
   % [HR] Hard Receiver
   % ...
+  % ADD NEW CHANGE
 
   % [SR] Soft Receiver
   % ...
