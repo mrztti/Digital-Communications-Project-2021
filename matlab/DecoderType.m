@@ -99,7 +99,7 @@ end
 
 
 %==========================================================================
-% SOFT DECODER VITERBI
+% SOFT DECODER VITERBI (TODO)
 %==========================================================================
 function dec = soft_decoder(symbols, trellis, constellation)
 end

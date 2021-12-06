@@ -15,7 +15,7 @@ EbN0 = -1:8; % power efficiency range
 % ======================================================================= %
 % Other Options
 % ======================================================================= %
-constellation = SymbolMapper.BPSK; % Choice of constellation
+constellation = SymbolMapper.QPSK_GRAY; % Choice of constellation
 convolutional_encoder = ConvEncoder.E1; % Choice of convolutional code
 decoder_type = DecoderType.HARD; % Choice of HARD/SOFT decoding
 
