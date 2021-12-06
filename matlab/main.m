@@ -7,28 +7,31 @@ clear
 % ======================================================================= %
 % Simulation Options
 % ======================================================================= %
-N = 3e2;  % simulate N bits each transmission (one block)
+N = 3e3;  % 5 simulate N bits each transmission (one block)
 maxNumErrs = 100; % get at least 100 bit errors (more is better)
-maxNum = 1e3; % OR stop if maxNum bits have been simulated
-EbN0 = [-10, 0, 10, 20, 30];%-1:8; % power efficiency range
+maxNum = 1e3; % 6 OR stop if maxNum bits have been simulated
+EbN0 = -1:8; % power efficiency range
 
 % ======================================================================= %
 % Other Options
 % ======================================================================= %
-constellation = SymbolMapper.QPSK_GRAY; % Choice of constellation
+constellation = SymbolMapper.BPSK; % Choice of constellation
+convolutional_encoder = ConvEncoder.E1; % Choice of convolutional code
+decoder_type = DecoderType.HARD; % Choice of HARD/SOFT decoding
 
+decoder = ViterbiDecoder(convolutional_encoder.trellis, decoder_type, constellation);
 
 % ======================================================================= %
 % Simulation Chain
 % ======================================================================= %
 BER = zeros(1, length(EbN0)); % pre-allocate a vector for BER results
 
-parfor i = 1:length(EbN0) % use parfor ('help parfor') to parallelize
+for i = 1:length(EbN0) % use parfor ('help parfor') to parallelize
   totErr = 0;  % Number of errors observed
   num = 0; % Number of bits processed
   snr = EbN0(i);
-  figure("Name", "Symbols received for EbN0 = " + string(snr));
-
+  
+  drawFirst = true;
   while((totErr < maxNumErrs) && (num < maxNum))
   % ===================================================================== %
   % Begin processing one block of information
@@ -37,7 +40,7 @@ parfor i = 1:length(EbN0) % use parfor ('help parfor') to parallelize
   u = randi([0,1], N, 1);
 
   % [ENC] convolutional encoder
-  c = u; % TODO
+  c = convolutional_encoder.encode(u);
 
   % [MOD] symbol mapper  
   x = constellation.map(c);
@@ -45,19 +48,19 @@ parfor i = 1:length(EbN0) % use parfor ('help parfor') to parallelize
   % [CHA] add Gaussian noise
   y = AWGN_channel(x, snr);
 
-  % scatterplot: plot(y, 'b.')
-  
-  plt = plot_symbols(y, constellation, snr);
-  % [HR] Hard Receiver
-  % ...
-  % ADD NEW CHANGE
+  % Only draw on the first iteration
+  if drawFirst
+      figure("Name", "Symbols received for EbN0 = " + string(snr));
+      hold on;
+      grid on;
+      plt = plot_symbols(y, constellation, snr);
+  end
 
-  % [SR] Soft Receiver
-  % ...
+  cf = decoder.decode(y);
   % ===================================================================== %
   % End processing one block of information
   % ===================================================================== %
-  BitErrs = 0; % count the bit errors and evaluate the bit error rate
+  BitErrs = sum(u~=cf); % count the bit errors and evaluate the bit error rate
   totErr = totErr + BitErrs;
   num = num + N; 
 
@@ -78,8 +81,6 @@ end
 % ======================================================================= %
 
 function p = plot_symbols(y, constellation, snr)
-    hold on;
-    grid on;
     col = linspace(1,10,length(y));
     scatter(real(y), imag(y), col);
     cs = constellation.constellation();
