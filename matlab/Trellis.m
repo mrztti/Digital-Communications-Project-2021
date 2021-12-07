@@ -18,6 +18,7 @@ classdef Trellis
             t.inputBasis = dec2bin(0:2^log2(tr.numInputSymbols)-1)' - '0';
             t.outputBasis = dec2bin(0:2^log2(tr.numOutputSymbols)-1)' - '0';
         end
+        
         function [new_state_index, output_index] = getNextState(obj, curr_index, input_index)
             new_state_index = oct2dec(obj.nextStates(curr_index, input_index)) + 1;
             output_index = obj.outputs(curr_index, input_index) + 1;

@@ -43,23 +43,20 @@ for i = 1:length(EbN0) % use parfor ('help parfor') to parallelize
   c = convolutional_encoder.encode(u);
 
   % [MOD] symbol mapper  
-  x_coded = constellation.map(c);
-  x_uncoded = constellation.map(u);
+  x = constellation.map(c);
 
   % [CHA] add Gaussian noise
-  y_coded = AWGN_channel(x_coded, snr);
-  y_uncoded = AWGN_channel(x_uncoded, snr);
+  y = AWGN_channel(x, snr);
 
   % Only draw on the first iteration
-%   if drawFirst
-%       figure("Name", "Symbols received for EbN0 = " + string(snr));
-%       hold on;
-%       grid on;
-%       plt = plot_symbols(y, constellation, snr);
-%   end
+  if drawFirst
+      figure("Name", "Symbols received for EbN0 = " + string(snr));
+      hold on;
+      grid on;
+      plt = plot_symbols(y, constellation, snr);
+  end
 
-  cf_coded = decoder.decode(y);
-  cf_uncoded = constellation.unmap(y_uncoded);
+  cf = decoder.decode(y);
   % ===================================================================== %
   % End processing one block of information
   % ===================================================================== %
