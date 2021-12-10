@@ -1,7 +1,8 @@
 % =========================================================================
 % Symbol Mapper class
 % =========================================================================
-% Defines all given symbol constellations
+% Defines all given symbol constellations and their respective map/unmap
+% functions.
 % Usage:
 %   sm = SymbolMapper.BPSK
 %   x = sm.map(c)

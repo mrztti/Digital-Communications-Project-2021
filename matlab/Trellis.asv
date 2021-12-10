@@ -61,8 +61,7 @@ classdef Trellis
     end
 end
 
-% Generate a rate 1/2 trellis for the first three codes through naive 
-% iteration over all possible combinations (states, inputs, outputs)
+Generate a rate 1/2 trellis for the first three codes through naive iteration
 function tr = generate_rate_half_trellis(constraint_length, G)
     n = 2;
     state_size = constraint_length-1;
@@ -89,7 +88,6 @@ function tr = generate_rate_half_trellis(constraint_length, G)
     tr.numStates = state_number;
 end
 
-% Generate the E4 trellis using custom function (TOFIX)
 function tr = generate_E4_trellis()
     n = 2^2;
     state_size = 3;
@@ -116,7 +114,6 @@ function tr = generate_E4_trellis()
     tr.numStates = state_number;
 end
 
-% Convert poly form to octal number
 function n = poly2oct(poly)
     n = 0;
     v = fliplr(poly);

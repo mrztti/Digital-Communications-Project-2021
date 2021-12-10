@@ -1,7 +1,8 @@
 % =========================================================================
 % Convolutional encoder class
 % =========================================================================
-%
+% Defines all the different encoders (E1,...)
+% 
 
 classdef ConvEncoder
     properties

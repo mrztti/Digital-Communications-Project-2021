@@ -1,3 +1,9 @@
+% =========================================================================
+% DecoderType class
+% =========================================================================
+% Defines the two types of Viterbi decoders (Hard and Soft)
+%
+
 classdef DecoderType
     properties
         decoder
