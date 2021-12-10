@@ -7,9 +7,9 @@ clear
 % ======================================================================= %
 % Simulation Options
 % ======================================================================= %
-N = 1e4;  % 5 simulate N bits each transmission (one block)
+N = 1e2;  % 5 simulate N bits each transmission (one block)
 maxNumErrs = 100; % get at least 100 bit errors (more is better)
-maxNum = 1e5; % 6 OR stop if maxNum bits have been simulated
+maxNum = 1e2; % 6 OR stop if maxNum bits have been simulated
 EbN0 = -1:8; % power efficiency range:
 
 % ======================================================================= %
@@ -90,14 +90,14 @@ figure()
 hold on;
 
 BER_theory = @(EbN0) 2*qfunc(sqrt(2*EbN0)) - (qfunc(sqrt(2*EbN0))).^2;
-plot(EbN0,BER_theory(10.^(EbN0 / 10)),'--', 'Color','Black')
-plot(EbN0, BER_uncoded, 'Color', 'Red')
-plot(EbN0, BER_coded, 'Color', 'Blue')
+plot(EbN0,BER_theory(10.^(EbN0 / 10)),'-.', 'Color','Blue')
+plot(EbN0, BER_uncoded,)
+plot(EbN0, BER_coded)
 
-title('Plot of coded and uncoded BER compared to the theoretical BER')
+title('Plot of coded and uncoded BER compared to the theoreticalBER')
 xlabel('E_b/N_0 [dB]')
 ylabel('BER')
-legend('Theoretical BER', 'Uncoded transmission', 'Coded transmission')
+legend('Theoretical limit', 'Uncoded transmission', 'Coded transmission')
 axis([EbN0(1) EbN0(end) 1e-4 1])
 set(gca, 'YScale', 'log')
 
