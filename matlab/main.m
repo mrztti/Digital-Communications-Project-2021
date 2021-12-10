@@ -7,10 +7,10 @@ clear
 % ======================================================================= %
 % Simulation Options
 % ======================================================================= %
-N = 3e2;  % 5 simulate N bits each transmission (one block)
+N = 1e4;  % 5 simulate N bits each transmission (one block)
 maxNumErrs = 100; % get at least 100 bit errors (more is better)
-maxNum = 1e3; % 6 OR stop if maxNum bits have been simulated
-EbN0 = -1:8; % power efficiency range
+maxNum = 1e5; % 6 OR stop if maxNum bits have been simulated
+EbN0 = -1:8; % power efficiency range:
 
 % ======================================================================= %
 % Other Options
@@ -24,15 +24,17 @@ decoder = ViterbiDecoder(convolutional_encoder.trellis, decoder_type, constellat
 % ======================================================================= %
 % Simulation Chain
 % ======================================================================= %
-BER = zeros(1, length(EbN0)); % pre-allocate a vector for BER results
+BER_coded = zeros(1, length(EbN0)); % pre-allocate a vector for BER results
+BER_uncoded = zeros(1, length(EbN0));
 
 for i = 1:length(EbN0) % use parfor ('help parfor') to parallelize
-  totErr = 0;  % Number of errors observed
+  totErr_u = 0;  % Number of uncoded errors observed
+  totErr_c = 0;  % Number of coded errors observed
   num = 0; % Number of bits processed
   snr = EbN0(i);
   
   drawFirst = true;
-  while((totErr < maxNumErrs) && (num < maxNum))
+  while((totErr_c < maxNumErrs) && (num < maxNum))
   % ===================================================================== %
   % Begin processing one block of information
   % ===================================================================== %
@@ -58,25 +60,46 @@ for i = 1:length(EbN0) % use parfor ('help parfor') to parallelize
 %       plt = plot_symbols(y, constellation, snr);
 %   end
 
-  cf_coded = decoder.decode(y);
+  cf_coded = decoder.decode(y_coded);
   cf_uncoded = constellation.unmap(y_uncoded);
   % ===================================================================== %
   % End processing one block of information
   % ===================================================================== %
-  BitErrs = sum(u~=cf); % count the bit errors and evaluate the bit error rate
-  totErr = totErr + BitErrs;
+  BitErrs_coded = sum(u~=cf_coded); % count the bit errors and evaluate the bit error rate
+  BitErrs_uncoded = sum(u~=cf_uncoded);
+  totErr_u = totErr_u + BitErrs_uncoded;
+  totErr_c = totErr_c + BitErrs_coded;
   num = num + N; 
 
-  disp(['+++ ' num2str(totErr) '/' num2str(maxNumErrs) ' errors. '...
+  disp(['+++ [' num2str(totErr_u) '] ' num2str(totErr_c) '/' num2str(maxNumErrs) ' errors. '...
       num2str(num) '/' num2str(maxNum) ' bits. Projected error rate = '...
-      num2str(totErr/num, '%10.1e') '. +++']);
+      num2str(totErr_c/num, '%10.1e') '. +++']);
   end 
-  BER(i) = totErr/num; 
+  BER_coded(i) = totErr_c/num; 
+  BER_uncoded(i) = totErr_u/num;
 end
 % ======================================================================= %
 % End
 % ======================================================================= %
 
+% ======================================================================= %
+% Plot results
+% ======================================================================= %
+
+figure()
+hold on;
+
+BER_theory = @(EbN0) 2*qfunc(sqrt(2*EbN0)) - (qfunc(sqrt(2*EbN0))).^2;
+plot(EbN0,BER_theory(10.^(EbN0 / 10)),'b-','MarkerSize',6)
+plot(EbN0, BER_uncoded)
+plot(EbN0, BER_coded)
+
+title('Plot of coded and uncoded BER compared to the theoretical min. BER')
+xlabel('E_b/N_0 [dB]')
+ylabel('BER')
+legend('Theoretical limit', 'Uncoded transmission', 'Coded transmission')
+axis([EbN0(1) EbN0(end) 1e-4 1])
+set(gca, 'YScale', 'log')
 
 
 % ======================================================================= %
