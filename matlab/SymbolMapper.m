@@ -32,6 +32,26 @@ classdef SymbolMapper
         function c = constellation(obj)
             c = obj.mapping_function(binary_basis(obj.n));
         end
+        function y = AWGN_channel(obj, x, snr)
+            % Simulates the awgn channel by adding complex gaussian noise
+            % x : symbol stream
+            % snr : sound to noise ratio in dB
+            
+            x = x(:); % Make sure that we have a column vector
+            n_x = length(x);
+        
+            % Calculate the std from the snr (only add noise if finite)
+            if isfinite(snr)
+                power = (x' * x) / (obj.n*n_x); % Calculate power of signal
+                std = sqrt(power.*10.^(-snr/10)); % calculate std from snr
+        
+                % Add complex gaussian noise to signal
+                N = (std * 1/sqrt(2)) .* (randn(n_x, length(snr)) + 1i * randn(n_x, length(snr)));
+                y = x + N;
+            else 
+                y = x;
+            end
+        end
 
     end
     enumeration
