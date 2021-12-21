@@ -8,13 +8,11 @@ classdef ConvEncoder
     properties
         encoder
         trellis
-        rate
     end
     methods
-        function ce = ConvEncoder(e, t, r)
+        function ce = ConvEncoder(e, t)
             ce.encoder = e;
             ce.trellis = t;
-            ce.rate = r;
         end
         function x = encode(obj, bitstream)
             x = obj.encoder(bitstream);
@@ -22,7 +20,8 @@ classdef ConvEncoder
 
         function ps = theoretical_BER_SOFT(obj, depth, EbN0)
             scale = 1:depth;
-            ps = arrayfun(@(ebn0) sum(arrayfun(@(d) obj.enumerate_weights(d) * qfunc(sqrt(2*d*obj.rate*ebn0)), scale)), 10.^(EbN0 / 10));
+            rate = trellis.num
+            ps = arrayfun(@(ebn0) sum(arrayfun(@(d) convolutional_encoder.enumerate_weights(d) * qfunc(sqrt(2*d*rate*ebn0)), scale)), 10.^(EbN0 / 10));
         end
 
         function Aj = enumerate_weights(obj, depth)
@@ -62,10 +61,10 @@ classdef ConvEncoder
         end
     end
     enumeration
-        E1(@encode_E1, Trellis.E1, 1/2)
-        E2(@encode_E2, Trellis.E2, 1/2)
-        E3(@encode_E3, Trellis.E3, 1/2)
-%         E4(@encode_E4, Trellis.E4, 1/3)
+        E1(@encode_E1, Trellis.E1),
+        E2(@encode_E2, Trellis.E2),
+        E3(@encode_E3, Trellis.E3)
+%         E4(@encode_E4, Trellis.E4)
     end
 end
 

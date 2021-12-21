@@ -54,13 +54,13 @@ function out = hard_decoder(symbols, trellis, constellation)
     for time = 1:L
     
         % Desired sequence
-        seq_desired = sequences(:, time);
-        metrics = sum(abs(trellis.specificOutputs - seq_desired),1);
+        seq = sequences(:, time);
+        metrics = sum(abs(trellis.specificOutputs - seq),1);
 
         % Iterate over all states and inputs
         for s_i = 1:num_states
             for inp_i = 1:num_inputs
-                next_state = trellis.nextStates(s_i, inp_i) + 1;
+                next_state = trellis.convertedNextStates(s_i, inp_i);
                 next_min = metrics(:, s_i, inp_i) + cumulative_metrics(s_i, time);
                 if next_min < cumulative_metrics(next_state,time+1)
                     cumulative_metrics(next_state,time+1) = next_min;
@@ -95,15 +95,14 @@ end
 %==========================================================================
 % SOFT DECODER VITERBI (TODO)
 %==========================================================================
-function dec = soft_decoder(symbols, trellis, constellation)
+function out = soft_decoder(symbols, trellis, constellation)
     num_states = trellis.numStates;
     num_inputs = trellis.numInputSymbols;
     num_out = trellis.numOutputSymbols;
     n = log2(num_out);
 
-    % Split sequence into separate sequences for each convolutional output
-    sequences = de_multiplex(n, symbols)';
-    L = size(sequences, 2);
+    mapped_outputs = reshape(constellation.map(trellis.specificOutputs), num_states, num_inputs);
+    L = length(symbols);
     
     % Store all the current best distances
     cumulative_metrics = zeros(num_states, L+1) + inf;
@@ -120,34 +119,20 @@ function dec = soft_decoder(symbols, trellis, constellation)
     
     % Iterate until the end of the sequence
     for time = 1:L
-        
+    
         % Desired sequence
-        seq_desired = sequences(:, time);
+        s = symbols(time,:);
+        metrics = abs(mapped_outputs-s).^2;
 
-        % Iterate overall all possible states 
-        for si = 1:num_states
-            % Skip unreachable states
-            if isinf(cumulative_metrics(si, time))
-                continue
-            end
-
-            slice = zeros(num_inputs, num_inputs);
-
-            % Iterate over all possible inputs
-            for inp = 1:num_inputs
-                % compute the new state and the new
-                [new_state, output] = trellis.getNextState(si, inp);
-                seq_out = trellis.getOutput(output);
-                dist = sum(abs(seq_out - seq_desired));
-                past_metric = cumulative_metrics(si, time);
-
-                % See if dist is smaller than any other for this state
-                % If no continue
-                % If yes, store all values
-                if (dist + past_metric) < cumulative_metrics(new_state, time + 1)
-                    cumulative_metrics(new_state, time + 1) = dist + past_metric;
-                    best_path_index(new_state, time + 1) = si;
-                    best_path_input(new_state, time + 1) = inp;
+        % Iterate over all states and inputs
+        for s_i = 1:num_states
+            for inp_i = 1:num_inputs
+                next_state = trellis.convertedNextStates(s_i, inp_i);
+                next_min = metrics(s_i, inp_i) + cumulative_metrics(s_i, time);
+                if next_min < cumulative_metrics(next_state,time+1)
+                    cumulative_metrics(next_state,time+1) = next_min;
+                    best_path_index(next_state, time+1) = s_i;
+                    best_path_input(next_state,time+1) = inp_i;
                 end
             end
         end
