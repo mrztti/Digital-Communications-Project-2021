@@ -5,6 +5,7 @@ classdef Trellis
         numStates % Number of states
         nextStates % Next state matrix
         outputs % Output matrix
+        specificOutputs % (:, state, input)
         convertedNextStates
         inputBasis
         outputBasis
@@ -18,6 +19,10 @@ classdef Trellis
             t.outputs = tr.outputs;
             t.inputBasis = dec2bin(0:2^log2(tr.numInputSymbols)-1)' - '0';
             t.outputBasis = dec2bin(0:2^log2(tr.numOutputSymbols)-1)' - '0';
+            t.specificOutputs = zeros(log2(tr.numOutputSymbols),tr.numStates);
+            for i = 1:tr.numInputSymbols
+                t.specificOutputs(:,:, i) = reshape(cell2mat(arrayfun(@(x) getOutput(t, x), t.outputs(:, i) + 1, 'UniformOutput',false)), log2(tr.numOutputSymbols),tr.numStates);
+            end
             t.convertedNextStates = arrayfun(@(x) convertNextStates(t, x), t.nextStates);
         end
         
@@ -33,7 +38,6 @@ classdef Trellis
         function y = getOutput(obj, x)
             y = obj.outputBasis(:, x);
         end
-
 
         function y = inputIdx2seq(obj, idx)
             split = arrayfun(@(x) obj.inputBasis(:, x), idx);
