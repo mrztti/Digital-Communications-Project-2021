@@ -8,7 +8,7 @@ clear
 % Simulation Options
 % ======================================================================= %
 N = 1e5;  % 5 simulate N bits each transmission (one block)
-maxNumErrs = 150; % get at least 100 bit errors (more is better)
+maxNumErrs = 100; % get at least 100 bit errors (more is better)
 maxNum = 1e6; % 6 OR stop if maxNum bits have been simulated
 EbN0 = -1:8; % power efficiency range:
 
@@ -16,8 +16,11 @@ EbN0 = -1:8; % power efficiency range:
 % Other Options
 % ======================================================================= %
 constellation = SymbolMapper.QPSK_GRAY; % Choice of constellation
-convolutional_encoder = ConvEncoder.E2; % Choice of convolutional code
-decoder_type = DecoderType.HARD; % Choice of HARD/SOFT decoding
+convolutional_encoder = ConvEncoder.E1; % Choice of convolutional code
+UPPER_BOUND_DEPTH = 10; % How far we are willing to go in precision for the upper bound
+
+
+decoder_type = DecoderType.HARD;
 decoder2_type = DecoderType.SOFT;
 decoder = ViterbiDecoder(convolutional_encoder.trellis, decoder_type, constellation);
 decoder2 = ViterbiDecoder(convolutional_encoder.trellis, decoder2_type, constellation);
@@ -99,7 +102,7 @@ hold on;
 BER_theory = @(EbN0) qfunc(sqrt(2*EbN0));
 
 plot(EbN0,BER_theory(10.^(EbN0 / 10)),'Marker','x')
-plot(EbN0,convolutional_encoder.theoretical_BER_SOFT(25, EbN0),'Marker','x')
+plot(EbN0,convolutional_encoder.theoretical_BER_SOFT(UPPER_BOUND_DEPTH, EbN0),'Marker','x')
 plot(EbN0, BER_uncoded, 'Color', 'Red')
 plot(EbN0, BER_coded, 'Color', 'Blue')
 plot(EbN0, BER_coded2, 'Color', 'Green')
