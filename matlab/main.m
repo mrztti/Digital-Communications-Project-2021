@@ -7,7 +7,7 @@ clear
 % ======================================================================= %
 % Simulation Options
 % ======================================================================= %
-N = 1e4;  % 5 simulate N bits each transmission (one block)
+N = 3e2;  % 5 simulate N bits each transmission (one block)
 maxNumErrs = 100; % get at least 100 bit errors (more is better)
 maxNum = 1e5; % 6 OR stop if maxNum bits have been simulated
 EbN0 = -1:8; % power efficiency range:
@@ -15,8 +15,8 @@ EbN0 = -1:8; % power efficiency range:
 % ======================================================================= %
 % Other Options
 % ======================================================================= %
-constellation = SymbolMapper.QPSK_GRAY; % Choice of constellation
-convolutional_encoder = ConvEncoder.E1; % Choice of convolutional code
+constellation = SymbolMapper.BPSK; % Choice of constellation
+convolutional_encoder = ConvEncoder.E2; % Choice of convolutional code
 decoder_type = DecoderType.HARD; % Choice of HARD/SOFT decoding
 
 decoder = ViterbiDecoder(convolutional_encoder.trellis, decoder_type, constellation);

@@ -5,6 +5,7 @@ classdef Trellis
         numStates % Number of states
         nextStates % Next state matrix
         outputs % Output matrix
+        convertedNextStates
         inputBasis
         outputBasis
     end
@@ -17,19 +18,22 @@ classdef Trellis
             t.outputs = tr.outputs;
             t.inputBasis = dec2bin(0:2^log2(tr.numInputSymbols)-1)' - '0';
             t.outputBasis = dec2bin(0:2^log2(tr.numOutputSymbols)-1)' - '0';
+            t.convertedNextStates = arrayfun(@(x) convertNextStates(t, x), t.nextStates);
         end
         
         function [new_state_index, output_index] = getNextState(obj, curr_index, input_index)
-            new_state_index = oct2dec(obj.nextStates(curr_index, input_index)) + 1;
+            new_state_index = obj.convertedNextStates(curr_index, input_index);
             output_index = obj.outputs(curr_index, input_index) + 1;
         end
 
-        function y = getOutput(obj, x)
-            n = log2(obj.numOutputSymbols);
-            y = zeros(n,1);
-            y_p = oct2poly(x-1);
-            y((n-length(y_p)+1):end) = y_p;
+        function cns = convertNextStates(obj, x)
+            cns = oct2dec(x) + 1;
         end
+
+        function y = getOutput(obj, x)
+            y = obj.outputBasis(:, x);
+        end
+
 
         function y = inputIdx2seq(obj, idx)
             split = arrayfun(@(x) obj.inputBasis(:, x), idx);
