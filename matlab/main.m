@@ -7,16 +7,16 @@ clear
 % ======================================================================= %
 % Simulation Options
 % ======================================================================= %
-N = 3e2;  % 5 simulate N bits each transmission (one block)
+N = 1e3;  % 5 simulate N bits each transmission (one block)
 maxNumErrs = 100; % get at least 100 bit errors (more is better)
-maxNum = 1e5; % 6 OR stop if maxNum bits have been simulated
+maxNum = 1e4; % 6 OR stop if maxNum bits have been simulated
 EbN0 = -1:8; % power efficiency range:
 
 % ======================================================================= %
 % Other Options
 % ======================================================================= %
-constellation = SymbolMapper.BPSK; % Choice of constellation
-convolutional_encoder = ConvEncoder.E2; % Choice of convolutional code
+constellation = SymbolMapper.QPSK_GRAY; % Choice of constellation
+convolutional_encoder = ConvEncoder.E1; % Choice of convolutional code
 decoder_type = DecoderType.HARD; % Choice of HARD/SOFT decoding
 
 decoder = ViterbiDecoder(convolutional_encoder.trellis, decoder_type, constellation);
@@ -123,7 +123,7 @@ function y = AWGN_channel(x, snr)
 
     % Calculate the std from the snr (only add noise if finite)
     if isfinite(snr)
-        power = (x' * x) / n_x; % Calculate power of signal
+        power = (x' * x) / (2*n_x); % Calculate power of signal
         std = sqrt(power.*10.^(-snr/10)); % calculate std from snr
 
         % Add complex gaussian noise to signal
