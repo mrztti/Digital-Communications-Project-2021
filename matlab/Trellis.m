@@ -40,7 +40,7 @@ classdef Trellis
         end
 
         function y = inputIdx2seq(obj, idx)
-            split = arrayfun(@(x) obj.inputBasis(:, x), idx);
+            split = reshape(cell2mat(arrayfun(@(x) obj.inputBasis(:, x), idx, 'UniformOutput',false)), [],log2(obj.numInputSymbols));
             y = multiplex(log2(obj.numInputSymbols), split);
         end
 
@@ -64,7 +64,7 @@ classdef Trellis
 
         E3(generate_rate_half_trellis(5, [1 0 0 1 1;1 1 0 1 1]))
 
-        %TODO E
+        E4(generate_E4())
 
     end
 end
@@ -122,6 +122,35 @@ function tr = generate_E4_trellis()
     tr.numInputSymbols = 1;
     tr.numOutputSymbols = n;
     tr.numStates = state_number;
+end
+
+
+function tr = generate_E4()
+    tr.numInputSymbols = 2^2;
+    tr.numOutputSymbols = 2^3;
+    tr.numStates = 2^3;
+    all_states = (dec2bin(0:2^3-1)' - '0');
+    all_inputs = (dec2bin(0:2^2-1)' - '0');
+    
+    output_matrix = zeros(tr.numStates, tr.numInputSymbols);
+    state_matrix = zeros(tr.numStates, tr.numInputSymbols);
+    for si = 1:tr.numStates
+        for inp_i = 1:tr.numInputSymbols
+            state = all_states(:,si);
+            input = all_inputs(:,inp_i);
+            disp(output_matrix(si, inp_i))
+            output_matrix(si, inp_i) = state(3,:) + 2*input(1) + 4*input(2);
+            new_state = zeros(3, 1);
+            new_state(1) = state(3);
+            new_state(2) = mod(state(1) + input(2), 2);
+            new_state(3) = mod(state(2) + input(1), 2);
+            state_matrix(si, inp_i) = new_state(1) + 2*new_state(2) + 4*new_state(3);
+        end
+    end
+    
+    tr.outputs = output_matrix;
+    tr.nextStates = state_matrix;
+    
 end
 
 % Convert poly form to octal number

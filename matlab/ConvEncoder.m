@@ -65,7 +65,7 @@ classdef ConvEncoder
         E1(@encode_E1, Trellis.E1, 1/2)
         E2(@encode_E2, Trellis.E2, 1/2)
         E3(@encode_E3, Trellis.E3, 1/2)
-%         E4(@encode_E4, Trellis.E4, 1/3)
+        E4(@encode_E4, Trellis.E4, 2/3)
     end
 end
 
