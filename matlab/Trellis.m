@@ -138,7 +138,6 @@ function tr = generate_E4()
         for inp_i = 1:tr.numInputSymbols
             state = all_states(:,si);
             input = all_inputs(:,inp_i);
-            disp(output_matrix(si, inp_i))
             output_matrix(si, inp_i) = state(3,:) + 2*input(1) + 4*input(2);
             new_state = zeros(3, 1);
             new_state(1) = state(3);
