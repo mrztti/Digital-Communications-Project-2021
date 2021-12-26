@@ -16,7 +16,7 @@ EbN0 = -1:8; % power efficiency range:
 % Other Options
 % ======================================================================= %
 constellation = SymbolMapper.QPSK_GRAY; % Choice of constellation
-convolutional_encoder = ConvEncoder.E1; % Choice of convolutional code
+convolutional_encoder = ConvEncoder.E2; % Choice of convolutional code
 UPPER_BOUND_DEPTH = 10; % How far we are willing to go in precision for the upper bound
 
 
@@ -110,7 +110,7 @@ plot(EbN0, BER_coded2, 'Color', 'Green')
 title('Plot of coded and uncoded BER compared to the theoretical BER')
 xlabel('E_b/N_0 [dB]')
 ylabel('BER')
-legend('Theoretical uncoded BER', 'Upper bound soft decoding', 'Uncoded transmission', 'Coded transmission(HARD)', 'Coded transmission(SOFT)')
+legend('Theoretical uncoded BER', 'Upper bound of BER (soft decoding)', 'Uncoded transmission', 'Coded transmission (HARD)', 'Coded transmission (SOFT)')
 axis([EbN0(1) EbN0(end) 1e-4 1])
 set(gca, 'YScale', 'log')
 
