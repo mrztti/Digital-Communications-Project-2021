@@ -127,11 +127,7 @@ function x = encode_E4(bitstream)
     
     for i = 1:N
         output_streams(i, :) = [state(3),bs1(i),bs2(i)];
-        new_state = zeros(3, 1);
-        new_state(1) = state(3);
-        new_state(2) = mod(state(1) + bs2(i), 2);
-        new_state(3) = mod(state(2) + bs1(i), 2);
-        state = new_state;
+        state = mod(circshift(state, 1) + [0; bs1(i);bs2(i)],2);
     end
 
     x = multiplex(3, output_streams);

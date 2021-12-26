@@ -40,8 +40,7 @@ classdef Trellis
         end
 
         function y = inputIdx2seq(obj, idx)
-            split = reshape(cell2mat(arrayfun(@(x) obj.inputBasis(:, x), idx, 'UniformOutput',false)), [],log2(obj.numInputSymbols));
-            y = multiplex(log2(obj.numInputSymbols), split);
+            y = cell2mat(arrayfun(@(x) obj.inputBasis(:, x), idx, 'UniformOutput',false))';
         end
 
     end
@@ -138,12 +137,9 @@ function tr = generate_E4()
         for inp_i = 1:tr.numInputSymbols
             state = all_states(:,si);
             input = all_inputs(:,inp_i);
-            output_matrix(si, inp_i) = state(3,:) + 2*input(1) + 4*input(2);
-            new_state = zeros(3, 1);
-            new_state(1) = state(3);
-            new_state(2) = mod(state(1) + input(2), 2);
-            new_state(3) = mod(state(2) + input(1), 2);
-            state_matrix(si, inp_i) = new_state(1) + 2*new_state(2) + 4*new_state(3);
+            output_matrix(si, inp_i) = poly2oct([state(3);input]');
+            new_state = mod(circshift(state, 1) + [0; input],2);
+            state_matrix(si, inp_i) = poly2oct(new_state');
         end
     end
     
