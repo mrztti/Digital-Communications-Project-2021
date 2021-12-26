@@ -26,13 +26,19 @@ classdef ConvEncoder
         end
 
         function Aj = enumerate_weights(obj, depth)
-            acc = zeros(depth, obj.trellis.numStates) - 1;
-            [Aj, ~] = ew_jk(obj, depth, 1, acc);
-            Aj = Aj - 1;
+            % Count the amount of possible codes that zero terminate at
+            % depth 'depth'
+            % Create an accumulator for dynamic programming with all non-visited=-1
+            acc = zeros(depth, obj.trellis.numStates) - 1; 
+            [Aj, ~] = ew_jk(obj, depth, 1, acc); % Call recursive func
+            Aj = Aj - 1; % Remove the all zero path
             
         end
 
         function [Ajk, accOut] = ew_jk(obj, depth, state, acc)
+            % Recursive function
+            
+            % Base case: Start at zero state
             if depth == 0
                 if state == 1
                     Ajk = 1;
@@ -41,6 +47,8 @@ classdef ConvEncoder
                 end
                 accOut = acc;
             else
+                % Load recursive call result directly from acc if already
+                % calculated
                 if (acc(depth, state) ~= -1)
                     Ajk = acc(depth, state);
                     accOut = acc;
@@ -51,11 +59,13 @@ classdef ConvEncoder
                             if obj.trellis.convertedNextStates(s_i, inp_i) ~= state
                                 continue;
                             end
+                            % Recursively call all possible previous states
+                            % at depth - 1
                             [Ajk_rec, acc] = ew_jk(obj, depth-1, s_i, acc);
                             Ajk = Ajk + Ajk_rec;
                         end
                     end
-                    acc(depth, state) = Ajk;
+                    acc(depth, state) = Ajk; % Store result
                     accOut = acc;
                 end
             end

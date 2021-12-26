@@ -7,9 +7,9 @@ clear
 % ======================================================================= %
 % Simulation Options
 % ======================================================================= %
-N = 1e5;  % 5 simulate N bits each transmission (one block)
+N = 1e3;  % 5 simulate N bits each transmission (one block)
 maxNumErrs = 100; % get at least 100 bit errors (more is better)
-maxNum = 1e6; % 6 OR stop if maxNum bits have been simulated
+maxNum = 1e4; % 6 OR stop if maxNum bits have been simulated
 EbN0 = -1:8; % power efficiency range:
 
 % ======================================================================= %
@@ -104,12 +104,11 @@ figure()
 hold on;
 plot(EbN0,e1.theoretical_BER_SOFT(UPPER_BOUND_DEPTH, EbN0),'Marker','x', 'Color',	'#9F0000')
 plot(EbN0,e2.theoretical_BER_SOFT(UPPER_BOUND_DEPTH, EbN0),'Marker','x', 'Color',	'#00741F')
-plot(EbN0, BER_coded1, 'Color', 'Red')
 plot(EbN0, BER_coded2, 'Color', 'Green')
 plot(EbN0, BER_coded3, 'Color', 'Blue')
 
 
-title('Plot of coded BER for E1, E2, E3 compared to their BER upper bound')
+title('Plot of coded BER for E1, E2, E3 compared to the BER upper bound')
 xlabel('E_b/N_0 [dB]')
 ylabel('BER')
 legend('E1 - Upper bound', 'E2 & E3 - Upper bound', 'E1 - SOFT', 'E2 - SOFT', 'E3 - SOFT')
