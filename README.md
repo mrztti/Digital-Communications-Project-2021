@@ -2,6 +2,10 @@
 
 ## Convolutional Coding and the Viterbi Algorithm
 
+**Task graphs are available to view by checking out the corresponding task branch**
+
+ex. `git checkout task-1`
+
 #### Project Overview
 
 The goal of this project is to provide a deeper understanding of how channel coding can be used to improve the performance of a digital communication system. The main task is to implement, evaluate, and compare several options for different encoders and modulation formats. In order to successfully complete this task, we have to program certain algorithms (like the Viterbi algorithm), as well as answer specific questions with the help of concepts introduced in the lectures (like channel capacity).The deliverables of the project are split into two parts.
