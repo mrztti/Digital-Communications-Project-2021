@@ -15,7 +15,8 @@ The goal of this project is to provide a deeper understanding of how channel cod
 After completing this project, we should be able to
 
 - successfully set up and run a simulation environment efficiently in MATLAB,
-- understand why and how MATLAB can be used to simulate the performance of a system that eventually transmits and receives analog waveforms,•use the concept of channel capacity as a benchmarking tool 
+- understand why and how MATLAB can be used to simulate the performance of a system that eventually transmits and receives analog waveforms
+- use the concept of channel capacity as a benchmarking tool 
 - encode a bit stream with a convolutional encoder and understand the relationship between the encoder and a trellis diagram
 - implement the Viterbi algorithm and understand how it works
 - explain and quantify the performance difference between hard and soft decoding
