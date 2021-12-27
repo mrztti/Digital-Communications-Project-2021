@@ -101,8 +101,10 @@ function out = soft_decoder(symbols, trellis, constellation)
     num_out = trellis.numOutputSymbols;
     n = log2(num_out);
 
-    mapped_outputs = reshape(constellation.map(trellis.specificOutputs), num_states, num_inputs);
+    mapped_outputs = reshape(constellation.map(trellis.specificOutputs), [], num_inputs);
     L = length(symbols);
+    rate_factor = size(mapped_outputs, 1)/num_states;
+    L = L/rate_factor;
     
     % Store all the current best distances
     cumulative_metrics = zeros(num_states, L+1) + inf;
@@ -121,8 +123,12 @@ function out = soft_decoder(symbols, trellis, constellation)
     for time = 1:L
     
         % Desired sequence
-        s = symbols(time,:);
-        metrics = abs(mapped_outputs-s).^2;
+        s = symbols((rate_factor*(time-1)+1):(rate_factor*(time-1)+rate_factor),:);
+        metrics  = zeros(num_states, num_inputs);
+        for i = 1:rate_factor
+            metrics = metrics + abs(mapped_outputs(i:rate_factor:end, :) - s(i)).^2;
+        end
+        
 
         % Iterate over all states and inputs
         for s_i = 1:num_states
