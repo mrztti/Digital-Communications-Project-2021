@@ -74,13 +74,13 @@ for i = 1:length(EbN0) % use parfor ('help parfor') to parallelize
   x3uc = cons3.map(u);
 
   % [CHA] add Gaussian noise
-  y1 = cons1.AWGN_channel(x1, snr);
-  y2 = cons2.AWGN_channel(x2, snr);
-  y3 = cons3.AWGN_channel(x3, snr);
+  y1 = cons1.AWGN_channel(x1, snr, enc1);
+  y2 = cons2.AWGN_channel(x2, snr, enc2);
+  y3 = cons3.AWGN_channel(x3, snr, enc3);
 
-  y1uc = cons1.AWGN_channel(x1uc, snr);
-  y2uc = cons2.AWGN_channel(x2uc, snr);
-  y3uc = cons3.AWGN_channel(x3uc, snr);
+  y1uc = cons1.AWGN_channel(x1uc, snr, ConvEncoder.NONE);
+  y2uc = cons2.AWGN_channel(x2uc, snr, ConvEncoder.NONE);
+  y3uc = cons3.AWGN_channel(x3uc, snr, ConvEncoder.NONE);
 
   % Only draw on the first iteration
 %   if drawFirst
