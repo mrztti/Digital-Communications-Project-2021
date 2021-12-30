@@ -7,40 +7,53 @@ clear
 % ======================================================================= %
 % Simulation Options
 % ======================================================================= %
-N = 1e5;  % 5 simulate N bits each transmission (one block)
-maxNumErrs = 200; % get at least 100 bit errors (more is better)
-maxNum = 2e6; % 6 OR stop if maxNum bits have been simulated
+N = 3e5;  % 5 simulate N bits each transmission (one block)
+maxNumErrs = 100; % get at least 100 bit errors (more is better)
+maxNum = 3e6; % 6 OR stop if maxNum bits have been simulated
 EbN0 = -1:8; % power efficiency range:
 
 % ======================================================================= %
 % Other Options
 % ======================================================================= %
-constellation = SymbolMapper.QPSK_GRAY; % Choice of constellation
-convolutional_encoder = ConvEncoder.E2; % Choice of convolutional code
-UPPER_BOUND_DEPTH = 15; % How far we are willing to go in precision for the upper bound
+decoder_type = DecoderType.SOFT;
 
+cons1 = SymbolMapper.BPSK;
+enc1 = ConvEncoder.E3;
+dec1 = ViterbiDecoder(enc1.trellis, decoder_type, cons1);
 
-decoder_type = DecoderType.HARD;
-decoder2_type = DecoderType.SOFT;
-decoder = ViterbiDecoder(convolutional_encoder.trellis, decoder_type, constellation);
-decoder2 = ViterbiDecoder(convolutional_encoder.trellis, decoder2_type, constellation);
+cons2 = SymbolMapper.QPSK_GRAY;
+enc2 = ConvEncoder.E3;
+dec2 = ViterbiDecoder(enc2.trellis, decoder_type, cons2);
+
+cons3 = SymbolMapper.AMPM;
+enc3 = ConvEncoder.E4;
+dec3 = ViterbiDecoder(enc3.trellis, decoder_type, cons3);
 
 % ======================================================================= %
 % Simulation Chain
 % ======================================================================= %
-BER_coded = zeros(1, length(EbN0)); % pre-allocate a vector for BER results
+BER_coded1 = zeros(1, length(EbN0)); % pre-allocate a vector for BER results
 BER_coded2 = zeros(1, length(EbN0));
-BER_uncoded = zeros(1, length(EbN0));
+BER_coded3 = zeros(1, length(EbN0));
+
+BER_uncoded1 = zeros(1, length(EbN0)); % pre-allocate a vector for BER results
+BER_uncoded2 = zeros(1, length(EbN0));
+BER_uncoded3 = zeros(1, length(EbN0));
 
 for i = 1:length(EbN0) % use parfor ('help parfor') to parallelize
-  totErr_u = 0;  % Number of uncoded errors observed
-  totErr_c = 0;  % Number of coded errors observed
-  totErr_c2 = 0;  % Number of coded errors observed
+  totErr1 = 0;  % Number of coded errors observed
+  totErr2 = 0;  % Number of coded errors observed
+  totErr3 = 0;  % Number of coded errors observed
+
+  totErr1uc = 0;  % Number of coded errors observed
+  totErr2uc = 0;  % Number of coded errors observed
+  totErr3uc = 0;  % Number of coded errors observed
+
   num = 0; % Number of bits processed
   snr = EbN0(i);
   
   drawFirst = true;
-  while((totErr_c2 < maxNumErrs) && (num < maxNum))
+  while((totErr1 + totErr2 + totErr3 < 3*maxNumErrs) && (num < maxNum))
   % ===================================================================== %
   % Begin processing one block of information
   % ===================================================================== %
@@ -48,15 +61,26 @@ for i = 1:length(EbN0) % use parfor ('help parfor') to parallelize
   u = randi([0,1], N, 1);
 
   % [ENC] convolutional encoder
-  c = convolutional_encoder.encode(u);
+  c1 = enc1.encode(u);
+  c2 = enc2.encode(u);
+  c3 = enc3.encode(u);
 
   % [MOD] symbol mapper  
-  x_coded = constellation.map(c);
-  x_uncoded = constellation.map(u);
+  x1 = cons1.map(c1);
+  x2 = cons2.map(c2);
+  x3 = cons3.map(c3);
+  x1uc = cons1.map(u);
+  x2uc = cons2.map(u);
+  x3uc = cons3.map(u);
 
   % [CHA] add Gaussian noise
-  y_coded = constellation.AWGN_channel(x_coded, snr, convolutional_encoder);
-  y_uncoded = constellation.AWGN_channel(x_uncoded, snr, ConvEncoder.NONE);
+  y1 = cons1.AWGN_channel(x1, snr, enc1);
+  y2 = cons2.AWGN_channel(x2, snr, enc2);
+  y3 = cons3.AWGN_channel(x3, snr, enc3);
+
+  y1uc = cons1.AWGN_channel(x1uc, snr, ConvEncoder.NONE);
+  y2uc = cons2.AWGN_channel(x2uc, snr, ConvEncoder.NONE);
+  y3uc = cons3.AWGN_channel(x3uc, snr, ConvEncoder.NONE);
 
   % Only draw on the first iteration
 %   if drawFirst
@@ -66,27 +90,44 @@ for i = 1:length(EbN0) % use parfor ('help parfor') to parallelize
 %       plt = plot_symbols(y, constellation, snr);
 %   end
 
-  cf_coded = decoder.decode(y_coded);
-  cf_coded2 = decoder2.decode(y_coded);
-  cf_uncoded = constellation.unmap(y_uncoded);
+  cf1 = dec1.decode(y1);
+  cf2 = dec2.decode(y2);
+  cf3 = dec3.decode(y3);
+
+  cf1uc = cons1.unmap(y1uc);
+  cf2uc = cons2.unmap(y2uc);
+  cf3uc = cons3.unmap(y3uc);
   % ===================================================================== %
   % End processing one block of information
   % ===================================================================== %
-  BitErrs_coded = sum(u~=cf_coded); % count the bit errors and evaluate the bit error rate
-  BitErrs_coded2 = sum(u~=cf_coded2);
-  BitErrs_uncoded = sum(u~=cf_uncoded);
-  totErr_u = totErr_u + BitErrs_uncoded;
-  totErr_c = totErr_c + BitErrs_coded;
-  totErr_c2 = totErr_c2 + BitErrs_coded2;
+  BitErrs1= sum(u~=cf1); % count the bit errors and evaluate the bit error rate
+  BitErrs2 = sum(u~=cf2);
+  BitErrs3 = sum(u~=cf3);
+  BitErrs1uc = sum(u~=cf1uc); % count the bit errors and evaluate the bit error rate
+  BitErrs2uc = sum(u~=cf2uc);
+  BitErrs3uc = sum(u~=cf3uc);
+
+
+  totErr1 = totErr1 + BitErrs1;
+  totErr2 = totErr2 + BitErrs2;
+  totErr3 = totErr3 + BitErrs3;
+
+  totErr1uc = totErr1uc + BitErrs1uc;
+  totErr2uc = totErr2uc + BitErrs2uc;
+  totErr3uc = totErr3uc + BitErrs3uc;
   num = num + N; 
 
-  disp(['+++ [' num2str(snr) '] ' num2str(totErr_c2) '/' num2str(maxNumErrs) ' errors. '...
+  disp(['+++ ' num2str((totErr1 + totErr2 + totErr3)/3) '/' num2str(maxNumErrs) ' errors. '...
       num2str(num) '/' num2str(maxNum) ' bits. Projected error rate = '...
-      num2str(totErr_c2/num, '%10.1e') '. +++']);
+      num2str(totErr1/num, '%10.1e') '. +++']);
   end 
-  BER_coded(i) = totErr_c/num; 
-  BER_coded2(i) = totErr_c2/num; 
-  BER_uncoded(i) = totErr_u/num;
+  BER_coded1(i) = totErr1/num;
+  BER_coded2(i) = totErr2/num; 
+  BER_coded3(i) = totErr3/num;
+
+  BER_uncoded1(i) = totErr1uc/num;
+  BER_uncoded2(i) = totErr2uc/num; 
+  BER_uncoded3(i) = totErr3uc/num;
 end
 % ======================================================================= %
 % End
@@ -98,24 +139,19 @@ end
 
 figure()
 hold on;
-
-BER_theory = @(EbN0) qfunc(sqrt(2*EbN0));
-
-plot(EbN0,BER_theory(10.^(EbN0 / 10)),'Marker','x')
-spect = distspec(decoder.trellis.structify(),UPPER_BOUND_DEPTH);
-ub = convolutional_encoder.theoretical_BER_SOFT(UPPER_BOUND_DEPTH, EbN0);
-plot(EbN0, ub,'Marker','x')
-
-plot(EbN0, BER_uncoded, 'Color', 'Red')
-plot(EbN0, BER_coded, 'Color', 'Blue')
+plot(EbN0, BER_coded1, 'Color', 'Red')
 plot(EbN0, BER_coded2, 'Color', 'Green')
+plot(EbN0, BER_coded3, 'Color', 'Cyan')
+
+plot(EbN0, BER_uncoded1, 'Color', '#AB0101', 'Marker','x')
+plot(EbN0, BER_uncoded2, 'Color', '#01AB31', 'Marker','x')
+plot(EbN0, BER_uncoded3, 'Color', '#1C01AB', 'Marker','x')
 
 
-
-title('Plot of coded and uncoded BER compared to the theoretical BER')
+title('Plot of different systems with/without coding')
 xlabel('E_b/N_0 [dB]')
 ylabel('BER')
-legend('Theoretical uncoded BER', 'Upper bound of BER (soft decoding)', 'Uncoded transmission', 'Coded transmission (HARD)', 'Coded transmission (SOFT)')
+legend('System 1 - CODED', 'System 2 - CODED', 'System 3 - CODED', 'System 1 - Uncoded', 'System 2 - Uncoded', 'System 3 - Uncoded')
 axis([EbN0(1) EbN0(end) 1e-4 1])
 set(gca, 'YScale', 'log')
 
