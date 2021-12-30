@@ -19,56 +19,16 @@ classdef ConvEncoder
         function x = encode(obj, bitstream)
             x = obj.encoder(bitstream);
         end
-
         function ps = theoretical_BER_SOFT(obj, depth, EbN0)
-            scale = 1:depth;
-            ps = arrayfun(@(ebn0) sum(arrayfun(@(d) obj.enumerate_weights(d) * qfunc(sqrt(2*d*obj.rate*ebn0)), scale)), 10.^(EbN0 / 10));
+            ps = min(arrayfun(@(e) theoretical_BER_SOFT_nonvec(obj, depth, e), 10.^(EbN0 / 10)), 0.5);
         end
-
-        function Aj = enumerate_weights(obj, depth)
-            % Count the amount of possible codes that zero terminate at
-            % depth 'depth'
-            % Create an accumulator for dynamic programming with all non-visited=-1
-            acc = zeros(depth, obj.trellis.numStates) - 1; 
-            [Aj, ~] = ew_jk(obj, depth, 1, acc); % Call recursive func
-            Aj = Aj - 1; % Remove the all zero path
-            
-        end
-
-        function [Ajk, accOut] = ew_jk(obj, depth, state, acc)
-            % Recursive function
-            
-            % Base case: Start at zero state
-            if depth == 0
-                if state == 1
-                    Ajk = 1;
-                else
-                    Ajk = 0;
-                end
-                accOut = acc;
-            else
-                % Load recursive call result directly from acc if already
-                % calculated
-                if (acc(depth, state) ~= -1)
-                    Ajk = acc(depth, state);
-                    accOut = acc;
-                else
-                    Ajk = 0;
-                    for inp_i = 1:size(obj.trellis.convertedNextStates, 2)
-                        for s_i = 1:size(obj.trellis.convertedNextStates, 1)
-                            if obj.trellis.convertedNextStates(s_i, inp_i) ~= state
-                                continue;
-                            end
-                            % Recursively call all possible previous states
-                            % at depth - 1
-                            [Ajk_rec, acc] = ew_jk(obj, depth-1, s_i, acc);
-                            Ajk = Ajk + Ajk_rec;
-                        end
-                    end
-                    acc(depth, state) = Ajk; % Store result
-                    accOut = acc;
-                end
-            end
+        function ps = theoretical_BER_SOFT_nonvec(obj, depth, EbN0)
+            spect = distspec(obj.trellis.structify(),depth);
+            dmin = spect.dfree;
+            ds = dmin:(dmin+depth-1);
+            qs = arrayfun(@(d) qfunc(sqrt(2*d*obj.rate*EbN0)), ds);
+            A = qs.*spect.weight;
+            ps = sum(A);
         end
     end
     enumeration
