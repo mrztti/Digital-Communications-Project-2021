@@ -27,7 +27,7 @@ classdef ConvEncoder
             dmin = spect.dfree;
             ds = dmin:(dmin+depth-1);
             qs = arrayfun(@(d) qfunc(sqrt(2*d*obj.rate*EbN0)), ds);
-            A = qs.*spect.weight;
+            A = qs.*spect.event;
             ps = sum(A);
         end
     end

@@ -8,8 +8,8 @@ clear
 % Simulation Options
 % ======================================================================= %
 N = 1e5;  % 5 simulate N bits each transmission (one block)
-maxNumErrs = 100; % get at least 100 bit errors (more is better)
-maxNum = 1e6; % 6 OR stop if maxNum bits have been simulated
+maxNumErrs = 200; % get at least 100 bit errors (more is better)
+maxNum = 2e6; % 6 OR stop if maxNum bits have been simulated
 EbN0 = -1:8; % power efficiency range:
 
 % ======================================================================= %
@@ -17,7 +17,7 @@ EbN0 = -1:8; % power efficiency range:
 % ======================================================================= %
 constellation = SymbolMapper.QPSK_GRAY; % Choice of constellation
 convolutional_encoder = ConvEncoder.E2; % Choice of convolutional code
-UPPER_BOUND_DEPTH = 10; % How far we are willing to go in precision for the upper bound
+UPPER_BOUND_DEPTH = 15; % How far we are willing to go in precision for the upper bound
 
 
 decoder_type = DecoderType.HARD;
@@ -55,8 +55,8 @@ for i = 1:length(EbN0) % use parfor ('help parfor') to parallelize
   x_uncoded = constellation.map(u);
 
   % [CHA] add Gaussian noise
-  y_coded = constellation.AWGN_channel(x_coded, snr);
-  y_uncoded = constellation.AWGN_channel(x_uncoded, snr);
+  y_coded = constellation.AWGN_channel(x_coded, snr, convolutional_encoder);
+  y_uncoded = constellation.AWGN_channel(x_uncoded, snr, ConvEncoder.NONE);
 
   % Only draw on the first iteration
 %   if drawFirst
@@ -80,7 +80,7 @@ for i = 1:length(EbN0) % use parfor ('help parfor') to parallelize
   totErr_c2 = totErr_c2 + BitErrs_coded2;
   num = num + N; 
 
-  disp(['+++ [' num2str(totErr_u) '] ' num2str(totErr_c2) '/' num2str(maxNumErrs) ' errors. '...
+  disp(['+++ [' num2str(snr) '] ' num2str(totErr_c2) '/' num2str(maxNumErrs) ' errors. '...
       num2str(num) '/' num2str(maxNum) ' bits. Projected error rate = '...
       num2str(totErr_c2/num, '%10.1e') '. +++']);
   end 
@@ -102,10 +102,15 @@ hold on;
 BER_theory = @(EbN0) qfunc(sqrt(2*EbN0));
 
 plot(EbN0,BER_theory(10.^(EbN0 / 10)),'Marker','x')
-plot(EbN0,convolutional_encoder.theoretical_BER_SOFT(UPPER_BOUND_DEPTH, EbN0),'Marker','x')
+spect = distspec(decoder.trellis.structify(),UPPER_BOUND_DEPTH);
+ub = convolutional_encoder.theoretical_BER_SOFT(UPPER_BOUND_DEPTH, EbN0);
+plot(EbN0, ub,'Marker','x')
+
 plot(EbN0, BER_uncoded, 'Color', 'Red')
 plot(EbN0, BER_coded, 'Color', 'Blue')
 plot(EbN0, BER_coded2, 'Color', 'Green')
+
+
 
 title('Plot of coded and uncoded BER compared to the theoretical BER')
 xlabel('E_b/N_0 [dB]')
