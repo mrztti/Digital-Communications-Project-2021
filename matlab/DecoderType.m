@@ -60,7 +60,7 @@ function out = hard_decoder(symbols, trellis, constellation)
         % Iterate over all states and inputs
         for s_i = 1:num_states
             for inp_i = 1:num_inputs
-                next_state = trellis.convertedNextStates(s_i, inp_i);
+                next_state = trellis.nextStates(s_i, inp_i);
                 next_min = metrics(:, s_i, inp_i) + cumulative_metrics(s_i, time);
                 if next_min < cumulative_metrics(next_state,time+1)
                     cumulative_metrics(next_state,time+1) = next_min;
@@ -133,7 +133,7 @@ function out = soft_decoder(symbols, trellis, constellation)
         % Iterate over all states and inputs
         for s_i = 1:num_states
             for inp_i = 1:num_inputs
-                next_state = trellis.convertedNextStates(s_i, inp_i);
+                next_state = trellis.nextStates(s_i, inp_i);
                 next_min = metrics(s_i, inp_i) + cumulative_metrics(s_i, time);
                 if next_min < cumulative_metrics(next_state,time+1)
                     cumulative_metrics(next_state,time+1) = next_min;

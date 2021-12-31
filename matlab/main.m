@@ -40,6 +40,8 @@ BER_uncoded1 = zeros(1, length(EbN0)); % pre-allocate a vector for BER results
 BER_uncoded2 = zeros(1, length(EbN0));
 BER_uncoded3 = zeros(1, length(EbN0));
 
+lb = LoadingBar(length(EbN0)*maxNum);
+
 for i = 1:length(EbN0) % use parfor ('help parfor') to parallelize
   totErr1 = 0;  % Number of coded errors observed
   totErr2 = 0;  % Number of coded errors observed
@@ -74,13 +76,13 @@ for i = 1:length(EbN0) % use parfor ('help parfor') to parallelize
   x3uc = cons3.map(u);
 
   % [CHA] add Gaussian noise
-  y1 = cons1.AWGN_channel(x1, snr);
-  y2 = cons2.AWGN_channel(x2, snr);
-  y3 = cons3.AWGN_channel(x3, snr);
+  y1 = cons1.AWGN_channel(x1, snr, enc1);
+  y2 = cons2.AWGN_channel(x2, snr, enc2);
+  y3 = cons3.AWGN_channel(x3, snr, enc3);
 
-  y1uc = cons1.AWGN_channel(x1uc, snr);
-  y2uc = cons2.AWGN_channel(x2uc, snr);
-  y3uc = cons3.AWGN_channel(x3uc, snr);
+  y1uc = cons1.AWGN_channel(x1uc, snr, ConvEncoder.NONE);
+  y2uc = cons2.AWGN_channel(x2uc, snr, ConvEncoder.NONE);
+  y3uc = cons3.AWGN_channel(x3uc, snr, ConvEncoder.NONE);
 
   % Only draw on the first iteration
 %   if drawFirst
@@ -117,9 +119,7 @@ for i = 1:length(EbN0) % use parfor ('help parfor') to parallelize
   totErr3uc = totErr3uc + BitErrs3uc;
   num = num + N; 
 
-  disp(['+++ ' num2str((totErr1 + totErr2 + totErr3)/3) '/' num2str(maxNumErrs) ' errors. '...
-      num2str(num) '/' num2str(maxNum) ' bits. Projected error rate = '...
-      num2str(totErr1/num, '%10.1e') '. +++']);
+  lb = lb.step(N);
   end 
   BER_coded1(i) = totErr1/num;
   BER_coded2(i) = totErr2/num; 
@@ -128,6 +128,8 @@ for i = 1:length(EbN0) % use parfor ('help parfor') to parallelize
   BER_uncoded1(i) = totErr1uc/num;
   BER_uncoded2(i) = totErr2uc/num; 
   BER_uncoded3(i) = totErr3uc/num;
+
+  lb = lb.set(i*maxNum);
 end
 % ======================================================================= %
 % End
