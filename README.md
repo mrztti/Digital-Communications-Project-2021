@@ -2,9 +2,11 @@
 
 ## Convolutional Coding and the Viterbi Algorithm
 
-**Task graphs are available to view by checking out the corresponding task branch**
+**Task graphs/code are available to view by checking out the corresponding task branch**
 
 ex. `git checkout task-1`
+
+Alternatively, if one does not have git installed, the respective `main.m` files are stored in `/matlab/main-archives/main-task-n`.
 
 #### Project Overview
 
