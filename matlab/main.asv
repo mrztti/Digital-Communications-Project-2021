@@ -7,9 +7,9 @@ clear
 % ======================================================================= %
 % Simulation Options
 % ======================================================================= %
-N = 1e3;  % 5 simulate N bits each transmission (one block)
+N = 1e5;  % 5 simulate N bits each transmission (one block)
 maxNumErrs = 100; % get at least 100 bit errors (more is better)
-maxNum = 1e4; % 6 OR stop if maxNum bits have been simulated
+maxNum = 1e6; % 6 OR stop if maxNum bits have been simulated
 EbN0 = -1:8; % power efficiency range:
 
 % ======================================================================= %
@@ -31,6 +31,7 @@ decoder3 = ViterbiDecoder(e3.trellis, decoder_type, constellation);
 BER_coded1 = zeros(1, length(EbN0)); % pre-allocate a vector for BER results
 BER_coded2 = zeros(1, length(EbN0));
 BER_coded3 = zeros(1, length(EbN0));
+lb = LoadingBar(length(EbN0)*maxNum);
 
 for i = 1:length(EbN0) % use parfor ('help parfor') to parallelize
   totErr1 = 0;  % Number of coded errors observed
@@ -38,6 +39,7 @@ for i = 1:length(EbN0) % use parfor ('help parfor') to parallelize
   totErr3 = 0;  % Number of coded errors observed
   num = 0; % Number of bits processed
   snr = EbN0(i);
+  
   
   drawFirst = true;
   while((totErr1 + totErr2 + totErr3 < 3*maxNumErrs) && (num < maxNum))
@@ -58,9 +60,9 @@ for i = 1:length(EbN0) % use parfor ('help parfor') to parallelize
   x3 = constellation.map(c3);
 
   % [CHA] add Gaussian noise
-  y1 = constellation.AWGN_channel(x1, snr);
-  y2 = constellation.AWGN_channel(x2, snr);
-  y3 = constellation.AWGN_channel(x3, snr);
+  y1 = constellation.AWGN_channel(x1, snr, e1);
+  y2 = constellation.AWGN_channel(x2, snr, e2);
+  y3 = constellation.AWGN_channel(x3, snr, e3);
 
   % Only draw on the first iteration
 %   if drawFirst
@@ -84,13 +86,12 @@ for i = 1:length(EbN0) % use parfor ('help parfor') to parallelize
   totErr3 = totErr3 + BitErrs3;
   num = num + N; 
 
-  disp(['+++ ' num2str((totErr1 + totErr2 + totErr3)/3) '/' num2str(maxNumErrs) ' errors. '...
-      num2str(num) '/' num2str(maxNum) ' bits. Projected error rate = '...
-      num2str(totErr1/num, '%10.1e') '. +++']);
+  lb = lb.step();
   end 
   BER_coded1(i) = totErr1/num;
   BER_coded2(i) = totErr2/num; 
   BER_coded3(i) = totErr3/num;
+  lb = lb.set(i*maxNum);
 end
 % ======================================================================= %
 % End
@@ -104,14 +105,16 @@ figure()
 hold on;
 plot(EbN0,e1.theoretical_BER_SOFT(UPPER_BOUND_DEPTH, EbN0),'Marker','x', 'Color',	'#9F0000')
 plot(EbN0,e2.theoretical_BER_SOFT(UPPER_BOUND_DEPTH, EbN0),'Marker','x', 'Color',	'#00741F')
+plot(EbN0,e3.theoretical_BER_SOFT(UPPER_BOUND_DEPTH, EbN0),'Marker','x', 'Color',	'#00420F')
+plot(EbN0, BER_coded1, 'Color', 'Red')
 plot(EbN0, BER_coded2, 'Color', 'Green')
 plot(EbN0, BER_coded3, 'Color', 'Blue')
 
 
-title('Plot of coded BER for E1, E2, E3 compared to the BER upper bound')
+title('Plot of coded BER for E1, E2, E3 compared to their BER upper bound')
 xlabel('E_b/N_0 [dB]')
 ylabel('BER')
-legend('E1 - Upper bound', 'E2 & E3 - Upper bound', 'E1 - SOFT', 'E2 - SOFT', 'E3 - SOFT')
+legend('E1 - Upper bound', 'E2 - Upper bound','E3 - Upper bound', 'E1 - SOFT', 'E2 - SOFT', 'E3 - SOFT')
 axis([EbN0(1) EbN0(end) 1e-4 1])
 set(gca, 'YScale', 'log')
 
