@@ -32,6 +32,8 @@ BER_coded = zeros(1, length(EbN0)); % pre-allocate a vector for BER results
 BER_coded2 = zeros(1, length(EbN0));
 BER_uncoded = zeros(1, length(EbN0));
 
+lb = LoadingBar(length(EbN0)*maxNum);
+
 for i = 1:length(EbN0) % use parfor ('help parfor') to parallelize
   totErr_u = 0;  % Number of uncoded errors observed
   totErr_c = 0;  % Number of coded errors observed
@@ -80,13 +82,12 @@ for i = 1:length(EbN0) % use parfor ('help parfor') to parallelize
   totErr_c2 = totErr_c2 + BitErrs_coded2;
   num = num + N; 
 
-  disp(['+++ [' num2str(snr) '] ' num2str(totErr_c2) '/' num2str(maxNumErrs) ' errors. '...
-      num2str(num) '/' num2str(maxNum) ' bits. Projected error rate = '...
-      num2str(totErr_c2/num, '%10.1e') '. +++']);
+  lb = lb.step(N);
   end 
   BER_coded(i) = totErr_c/num; 
   BER_coded2(i) = totErr_c2/num; 
   BER_uncoded(i) = totErr_u/num;
+  lb = lb.set(i*maxNum);
 end
 % ======================================================================= %
 % End
