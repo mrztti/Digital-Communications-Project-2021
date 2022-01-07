@@ -135,7 +135,7 @@ function y = AMPM_unmap(symbols)
     s3 = (real(symbols) < 0);
     s2 = (imag(symbols).*sign(s3 - 0.5) < 0); % flipped rule for different quandrants
 
-    a = 4 / ( sqrt(2)*(4 + 2*sqrt(5)) );
+    a = 1 / sqrt(10);
     rs = sign((real(symbols) > 0) - 0.5);
     is = sign((imag(symbols) > 0) - 0.5);
     s1 = (real(symbols - 2 * a * rs - 1i * 2 * a * is) > 0);
