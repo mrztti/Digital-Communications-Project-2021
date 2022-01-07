@@ -2,11 +2,47 @@
 
 ## Convolutional Coding and the Viterbi Algorithm
 
+------------------------------------------------------------------------------------------------------------
+
 **Task graphs/code are available to view by checking out the corresponding task branch**
 
 ex. `git checkout task-1`
 
 Alternatively, if one does not have git installed, the respective `main.m` files are stored in `/matlab/main-archives/main-task-n`.
+
+------------------------------------------------------------------------------------------------------------
+
+## Description of scripts & classes:
+
+#### main.m
+
+Main script, used to launch the simulation chain and output the figures.
+
+#### ConvEncoder.m
+
+Provides the description and functionalities of all the different convolutional encoders.
+
+#### DecoderType.m
+
+Defines the two types [HARD/SOFT] of Viterbi decoding algorithms and their implementation.
+
+#### ViterbiDecoder.m
+
+Modulare handle for storing a decoder object with its given decoder type and other properties
+
+#### Trellis.m
+
+Definitions and implementations of all the different encoder trellis
+
+#### SymbolMapper.m
+
+Contains all implementations of the constellations, as well as helper methods like the AWGN channel simulation.
+
+#### LoadingBar.m
+
+Simple class to display loading bar when running.
+
+------------------------------------------------------------------------------------------------------------
 
 #### Project Overview
 
